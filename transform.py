@@ -62,7 +62,7 @@ try:
 
     # Cleanup a bit...
     plist = etree.parse(in_plist)
-    dead_keys = ['LocalComputer', 'TestObjectClass', 'TestIdentifier']
+    dead_keys = ['LocalComputer', 'TestObjectClass', 'TestIdentifier', 'FormatVersion']
     for k in dead_keys:
         l = plist.xpath('//key[text() = "{0}"]'.format(k))
         for noise in l:

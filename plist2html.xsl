@@ -11,13 +11,6 @@
         <title>Xcode UI Testing report</title>
         <link rel="stylesheet" href="../static/table.css" />
         <script src="../static/jquery-3.1.1.min.js">&#160;</script>
-
-        <style>
-          .treegrid-indent {width:16px; height: 16px; display: inline-block; position: relative;}
-          .treegrid-expander {width:16px; height: 16px; display: inline-block; position: relative; cursor: pointer;}
-          .treegrid-expander-expanded{background-image: url(../static/collapse.png); }
-          .treegrid-expander-collapsed{background-image: url(../static/expand.png); }
-        </style>
       </head>
       <body>
         <div id="main">

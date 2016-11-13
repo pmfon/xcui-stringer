@@ -18,11 +18,21 @@
           <h1>UI Test Report</h1>
           <div>
             <table id="table" class="table">
-              <tbody>
-                <xsl:for-each select="//array[preceding-sibling::key[1][text()='ActivitySummaries']]">
+              <xsl:for-each select="//array[preceding-sibling::key[1][text()='ActivitySummaries']]">
+                <tbody>
+
+                  <tr>
+                    <td>Test Name</td>
+                    <td><xsl:value-of select="../key[text() = 'TestName']/following-sibling::*" /></td>
+                  </tr>
+                  <tr>
+                    <td>Test Status</td>
+                    <td><xsl:value-of select="../key[text() = 'TestStatus']/following-sibling::*" /></td>
+                  </tr>
+
                   <xsl:call-template name="activity" />
-                </xsl:for-each>
-              </tbody>
+                </tbody>
+              </xsl:for-each>
             </table>
           </div>
         </div>
@@ -49,12 +59,16 @@
       <xsl:if test="key[text()='Title']">
         <tr>
           <td>
-            <xsl:variable name="ts" select="real[preceding-sibling::*[1][text()='StartTimeInterval']]" />
-            <xsl:value-of select="date:add('2001-01-01T00:00:00Z', date:duration($ts))" />
+            <xsl:variable name="ts" select="date:add('2001-01-01T00:00:00Z', date:duration(real[preceding-sibling::*[1][text()='StartTimeInterval']]))" />
+            <time datetime="{$ts}">
+              <xsl:value-of select="date:day-in-month($ts)" />&#160;
+              <xsl:value-of select="date:month-abbreviation($ts) " />&#160;
+              <xsl:value-of select="date:year($ts) " />&#160;
+              <xsl:value-of select="substring(date:time($ts), 1, 12)" /> &#160;
+            </time>
           </td>
           <td><xsl:value-of select="string[preceding-sibling::*[1][text()='Title']]" /></td>
         </tr>
-
 
         <xsl:if test="true[preceding-sibling::key[1][text()='HasScreenshotData']]">
           <xsl:variable name="uuid" select="string[preceding-sibling::key[1][text()='UUID']]" />
@@ -65,8 +79,8 @@
         </xsl:if>
 
       </xsl:if>
-    </xsl:for-each>
 
+    </xsl:for-each>
   </xsl:template>
 
 </xsl:stylesheet>

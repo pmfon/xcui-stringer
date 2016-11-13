@@ -4,6 +4,7 @@
 
 from lxml import etree
 from os import path as p
+from distutils import dir_util
 import webbrowser
 import traceback
 import shutil
@@ -13,23 +14,19 @@ import os
 R = {   'xsl': 'plist2html.xsl',
         'static': [
             'vendor/jquery/jquery-3.1.1.min.js',
-            'vendor/treegrid/js/jquery.treegrid.min.js',
-            'vendor/treegrid/css/jquery.treegrid.css',
             'table.css',
-            'vendor/treegrid/img/collapse.png',
-            'vendor/treegrid/img/expand.png',
         ],
         'in': '{0}_TestSummaries.plist',
         'out': 'index.html',
-        'media_in': 'Attachments',
-        'media_out': 'media'
+        'att_in': 'Attachments',
+        'att_out': 'Attachments'
     }
 S = 'static'
 
 # Create the shared directory structure and populate the dependencies for
 # the report markup.
 host_dir = p.join(p.expanduser('~'), 'Documents', 'xc-ui-reports')
-host_media = p.join(host_dir, R['media_out'])
+host_media = p.join(host_dir, R['att_out'])
 host_shared = p.join(host_dir, S, '')
 
 os.makedirs(p.dirname(host_media), exist_ok=True)
@@ -46,11 +43,11 @@ except Exception as e:
 try:
     test_src = sys.argv[1]
     test_uid = sys.argv[2]
-    src_media = p.join(test_src, R['media_in'])
+    src_media = p.join(test_src, R['att_in'])
 
     # Copy screenshots to the shared media directory.
     try:
-        shutil.copytree(src_media, host_media, ignore=shutil.ignore_patterns('El*', 'Sy*'))
+        dir_util.copy_tree(src_media, host_media, update=True)
     except Exception as e:
         print(e)
         pass
@@ -71,7 +68,7 @@ try:
 
     # ...before transforming the plist to HTML.
     transform = etree.XSLT(etree.parse(in_xslt))
-    transformed = transform(plist)
+    transformed = transform(plist, attachments=etree.XSLT.strparam(host_media))
 
     os.makedirs(p.dirname(out_html), exist_ok=True)
     with open(out_html, 'w') as f:

@@ -4,6 +4,7 @@
   xmlns:date="http://exslt.org/dates-and-times"
   extension-element-prefixes="date">
   <xsl:output method="html"/>
+  <xsl:param name="attachments" />
 
   <xsl:template match="/">
     <html>
@@ -28,22 +29,6 @@
         <script>
           <xsl:text disable-output-escaping="yes">
             <![CDATA[
-            function linkImages() {
-
-            $('td').each(function(){
-            var td = $(this);
-            td.html(
-            td.text().replace(
-            /[A-Z0-9-]{30,39}/g,
-            '<a href="../media/Screenshot_$&.png">$&</a>'
-            )
-            )
-            });
-            }
-
-            $(document).ready(function() {
-            linkImages();
-            });
             ]]>
           </xsl:text>
         </script>
@@ -69,12 +54,16 @@
           </td>
           <td><xsl:value-of select="string[preceding-sibling::*[1][text()='Title']]" /></td>
         </tr>
-        <xsl:if test="key[text()='UUID']">
+
+
+        <xsl:if test="true[preceding-sibling::key[1][text()='HasScreenshotData']]">
+          <xsl:variable name="uuid" select="string[preceding-sibling::key[1][text()='UUID']]" />
           <tr>
-            <td>UUID</td>
-            <td><xsl:value-of select="string[preceding-sibling::*[1][text()='UUID']]" /></td>
+            <td>Screen Capture</td>
+            <td><img src="{$attachments}/Screenshot_{$uuid}.png" /></td>
           </tr>
         </xsl:if>
+
       </xsl:if>
     </xsl:for-each>
 

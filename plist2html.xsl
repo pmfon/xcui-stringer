@@ -16,14 +16,21 @@
       <body>
         <div id="main">
           <h1>UI Test Report</h1>
+          <h2>Failures</h2>
+          <div>
+            <div id="failures" class="table">
+              <xsl:apply-templates select="//array[preceding-sibling::*[1][text()='FailureSummaries']]" />
+            </div>
+          </div>
+          <h2>Summary</h2>
           <div>
             <table id="table" class="table">
               <xsl:for-each select="//array[preceding-sibling::key[1][text()='ActivitySummaries']]">
                 <tbody>
-
+                  <xsl:variable name="uuid" select="../string[preceding-sibling::*[text()='TestSummaryGUID']]" />
                   <tr>
                     <td>Test Name</td>
-                    <td><xsl:value-of select="../key[text() = 'TestName']/following-sibling::*" /></td>
+                    <td id="{$uuid}"><xsl:value-of select="../key[text() = 'TestName']/following-sibling::*" /></td>
                   </tr>
                   <tr>
                     <td>Test Status</td>
@@ -52,6 +59,19 @@
   </xsl:template>
   <xsl:template match="true">
     <span class="true">true</span>
+  </xsl:template>
+
+  <!-- Failures -->
+  <xsl:template match="//array[preceding-sibling::*[1][text()='FailureSummaries']]/dict">
+    <xsl:variable name="uuid" select="../../string[preceding-sibling::*[1][text()='TestSummaryGUID']]" />
+    <xsl:for-each select=".">
+      <div>
+        <p><xsl:value-of select="*[preceding-sibling::*[1][text()='FileName']]" />::<xsl:value-of select="*[preceding-sibling::*[1][text()='LineNumber']]" /></p>
+      </div>
+      <div>
+        <p><a href="#{$uuid}"><xsl:value-of select="*[preceding-sibling::*[1][text()='Message']]" /></a></p>
+      </div>
+    </xsl:for-each>
   </xsl:template>
 
   <xsl:template name="activity">

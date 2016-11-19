@@ -18,18 +18,20 @@
       <body>
         <div id="main">
           <h1>UI Test Report</h1>
-          <h2>Failures</h2>
+
+          <div class="sub"><h2>Failures</h2></div>
           <div>
-            <div id="failures" class="table">
+            <div id="failures">
               <xsl:apply-templates select="//array[preceding-sibling::*[1][text()='FailureSummaries']]" />
             </div>
           </div>
-          <h2>Timeline</h2>
+
+          <div class="sub"><h2>Timeline</h2></div>
           <div id="timeline">
-            <div id="visualization">
-            </div>
+            <div id="visualization"></div>
           </div>
-          <h2>Summary</h2>
+
+          <div class="sub"><h2>Summary</h2></div>
           <div>
             <table id="table" class="table">
               <xsl:for-each select="//array[preceding-sibling::key[1][text()='ActivitySummaries']]">
@@ -50,33 +52,53 @@
             </table>
           </div>
         </div>
+
         <script>
           <xsl:text disable-output-escaping="yes">
             <![CDATA[
-              $(document).ready(function() {
+
               var container = document.getElementById('visualization');
 
+              var n = 0;
               var items = [];
+              var groups = [];
               var min = new Date(8640000000000000);
               var max = new Date(-8640000000000000);
 
-              $('tbody time').each(function(n) {
-                var d = new Date($(this).attr('datetime'));
-                if (d < min) {
-                  min = d;
-                } else if (d > max) {
-                  max = d;
-                }
+              $('tbody').each(function() {
 
-                items[n] = {id: 't' + n, content: $(this).parent().next().first().text(), start: d, group: $(this).closest('tbody').attr('id')}
+                var group = { id: $(this).attr('id'), content: $(this).find('td:nth-of-type(2)').first().text()}
+
+                $(this).find('time').each(function() {
+                  var d = new Date($(this).attr('datetime'));
+                  if (d < min) {
+                    min = d;
+                    } else if (d > max) {
+                    max = d;
+                    }
+
+                    n = items.push({id: 't' + n, content: $(this).parent().next().first().text(), start: d, group: group['id'] });
+                });
+
+                groups.push(group);
               });
 
-              max = new Date(max.getTime() + 5000);
-              min = new Date(min.getTime() - 5000);
 
-              var options = { max: max, min: min, moveable: false, zoomable: false, snap: null, timeAxis: {scale: 'millisecond', step: 100}, showMinorLabels: false, showMajorLabels: false, showCurrentTime: false, align: 'left'};
-              var timeline = new vis.Timeline(container, new vis.DataSet(items), options);
-              })
+              max = new Date(max.getTime() + 100);
+              min = new Date(min.getTime() - 100);
+
+              var options = { max: max,
+                              min: min,
+                              moveable: false,
+                              zoomable: false,
+                              snap: null,
+                              timeAxis: {scale: 'millisecond', step: 5},
+                              showMinorLabels: false,
+                              showCurrentTime: false,
+                              align: 'left'};
+
+              var timeline = new vis.Timeline(container, items, groups, options);
+
             ]]>
           </xsl:text>
         </script>
@@ -98,15 +120,13 @@
     <xsl:for-each select=".">
       <div>
         <p><xsl:value-of select="*[preceding-sibling::*[1][text()='FileName']]" />::<xsl:value-of select="*[preceding-sibling::*[1][text()='LineNumber']]" /></p>
-      </div>
-      <div>
         <p><a href="#{$uuid}"><xsl:value-of select="*[preceding-sibling::*[1][text()='Message']]" /></a></p>
       </div>
     </xsl:for-each>
   </xsl:template>
 
   <xsl:template name="activity">
-    <xsl:for-each select="//dict">
+    <xsl:for-each select=".//dict">
       <xsl:if test="key[text()='Title']">
         <tr>
           <td>
@@ -130,7 +150,6 @@
         </xsl:if>
 
       </xsl:if>
-
     </xsl:for-each>
   </xsl:template>
 

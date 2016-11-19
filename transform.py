@@ -32,7 +32,7 @@ V = 'vendor'
 
 # Create the shared directory structure and populate the dependencies for
 # the report markup.
-host_dir = p.join(p.expanduser('~'), 'Documents', 'xc-ui-reports')
+host_dir = p.join(p.expanduser('~'), 'Documents', 'xcui-stringer')
 host_media = p.join(host_dir, R['att_out'])
 host_shared = p.join(host_dir, S, '')
 

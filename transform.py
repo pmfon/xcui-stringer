@@ -7,6 +7,8 @@ from os import path as p
 from distutils import dir_util
 import webbrowser
 import traceback
+import datetime
+import fnmatch
 import shutil
 import sys
 import os
@@ -19,7 +21,8 @@ R = {   'xsl': 'plist2html.xsl',
         'static': [
             'table.css',
         ],
-        'in': '{0}_TestSummaries.plist',
+        # A glob.
+        'in': '*_TestSummaries.plist',
         'out': 'index.html',
         'att_in': 'Attachments',
         'att_out': 'Attachments'
@@ -48,7 +51,6 @@ except Exception as e:
 
 try:
     test_src = sys.argv[1]
-    test_uid = sys.argv[2]
     src_media = p.join(test_src, R['att_in'])
 
     # Copy screenshots to the shared media directory.
@@ -60,8 +62,13 @@ try:
 
     # Setup source and destination paths.
     in_xslt = p.join(sys.path[0], R['xsl'])
-    in_plist = p.join(test_src, R['in'].format(test_uid))
-    out_html = p.join(host_dir, test_uid, R['out'])
+    in_plist = ''
+
+    for f in os.listdir(test_src):
+        if fnmatch.fnmatch(f, R['in']):
+            in_plist = p.join(test_src, f)
+
+    out_html = p.join(host_dir, datetime.datetime.utcnow().strftime('%d%m%H%M%S'), R['out'])
 
     # Cleanup a bit...
     plist = etree.parse(in_plist)

@@ -11,7 +11,9 @@
       <head>
         <title>Xcode UI Testing report</title>
         <link rel="stylesheet" href="../static/table.css" />
-        <script src="../static/jquery-3.1.1.min.js">&#160;</script>
+        <script src="../static/vendor/jquery/jquery-3.1.1.min.js">&#160;</script>
+        <script src="../static/vendor/vis/vis.min.js">&#160;</script>
+         <link href="../static/vendor/vis/vis.min.css" rel="stylesheet" type="text/css" />
       </head>
       <body>
         <div id="main">
@@ -22,11 +24,16 @@
               <xsl:apply-templates select="//array[preceding-sibling::*[1][text()='FailureSummaries']]" />
             </div>
           </div>
+          <h2>Timeline</h2>
+          <div id="timeline">
+            <div id="visualization">
+            </div>
+          </div>
           <h2>Summary</h2>
           <div>
             <table id="table" class="table">
               <xsl:for-each select="//array[preceding-sibling::key[1][text()='ActivitySummaries']]">
-                <tbody>
+                <tbody id="a{position()}">
                   <xsl:variable name="uuid" select="../string[preceding-sibling::*[text()='TestSummaryGUID']]" />
                   <tr>
                     <td>Test Name</td>
@@ -46,6 +53,30 @@
         <script>
           <xsl:text disable-output-escaping="yes">
             <![CDATA[
+              $(document).ready(function() {
+              var container = document.getElementById('visualization');
+
+              var items = [];
+              var min = new Date(8640000000000000);
+              var max = new Date(-8640000000000000);
+
+              $('tbody time').each(function(n) {
+                var d = new Date($(this).attr('datetime'));
+                if (d < min) {
+                  min = d;
+                } else if (d > max) {
+                  max = d;
+                }
+
+                items[n] = {id: 't' + n, content: $(this).parent().next().first().text(), start: d, group: $(this).closest('tbody').attr('id')}
+              });
+
+              max = new Date(max.getTime() + 5000);
+              min = new Date(min.getTime() - 5000);
+
+              var options = { max: max, min: min, moveable: false, zoomable: false, snap: null, timeAxis: {scale: 'millisecond', step: 100}, showMinorLabels: false, showMajorLabels: false, showCurrentTime: false, align: 'left'};
+              var timeline = new vis.Timeline(container, new vis.DataSet(items), options);
+              })
             ]]>
           </xsl:text>
         </script>

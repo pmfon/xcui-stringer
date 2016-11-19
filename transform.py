@@ -12,8 +12,11 @@ import sys
 import os
 
 R = {   'xsl': 'plist2html.xsl',
+        'vendor': [
+            'vendor/jquery',
+            'vendor/vis',
+        ],
         'static': [
-            'vendor/jquery/jquery-3.1.1.min.js',
             'table.css',
         ],
         'in': '{0}_TestSummaries.plist',
@@ -22,6 +25,7 @@ R = {   'xsl': 'plist2html.xsl',
         'att_out': 'Attachments'
     }
 S = 'static'
+V = 'vendor'
 
 # Create the shared directory structure and populate the dependencies for
 # the report markup.
@@ -33,6 +37,8 @@ os.makedirs(p.dirname(host_media), exist_ok=True)
 os.makedirs(p.dirname(host_shared), exist_ok=True)
 
 try:
+    for relpath in R[V]:
+        shutil.copytree(p.join(sys.path[0], relpath), p.join(host_shared, relpath))
     for relpath in R[S]:
         shutil.copy(p.join(sys.path[0], relpath), host_shared)
 except Exception as e:

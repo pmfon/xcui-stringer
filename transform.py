@@ -13,6 +13,7 @@ import shutil
 import sys
 import os
 
+
 R = {   'xsl': 'plist2html.xsl',
         'vendor': [
             'vendor/jquery',
@@ -27,33 +28,30 @@ R = {   'xsl': 'plist2html.xsl',
         'att_in': 'Attachments',
         'att_out': 'Attachments'
     }
-S = 'static'
-V = 'vendor'
-
-# Create the shared directory structure and populate the dependencies for
-# the report markup.
-host_dir = p.join(p.expanduser('~'), 'Documents', 'xcui-stringer')
-host_media = p.join(host_dir, R['att_out'])
-host_shared = p.join(host_dir, S, '')
-
-os.makedirs(p.dirname(host_media), exist_ok=True)
-os.makedirs(p.dirname(host_shared), exist_ok=True)
-
-try:
-    for relpath in R[V]:
-        shutil.copytree(p.join(sys.path[0], relpath), p.join(host_shared, relpath))
-    for relpath in R[S]:
-        shutil.copy(p.join(sys.path[0], relpath), host_shared)
-except Exception as e:
-    print(e)
-    pass
 
 
 try:
     test_src = sys.argv[1]
-    src_media = p.join(test_src, R['att_in'])
+    report_dst = p.join(p.expanduser('~'), 'Documents', 'xcui-stringer')
+    if len(sys.argv) > 2:
+        report_dst = sys.argv[2]
 
-    # Copy screenshots to the shared media directory.
+    # Create the directory structure and copy resources for the report markup.
+    host_media = p.join(report_dst, R['att_out'])
+    host_shared = p.join(report_dst, 'static', '')
+    os.makedirs(p.dirname(host_media), exist_ok=True)
+    os.makedirs(p.dirname(host_shared), exist_ok=True)
+    try:
+        for relpath in R['vendor']:
+            shutil.copytree(p.join(sys.path[0], relpath), p.join(host_shared, relpath))
+        for relpath in R['static']:
+            shutil.copy(p.join(sys.path[0], relpath), host_shared)
+    except Exception as e:
+        print(e)
+        pass
+
+    # Copy the screenshots from the XCUI test logs.
+    src_media = p.join(test_src, R['att_in'])
     try:
         dir_util.copy_tree(src_media, host_media, update=True)
     except Exception as e:
@@ -68,7 +66,7 @@ try:
         if fnmatch.fnmatch(f, R['in']):
             in_plist = p.join(test_src, f)
 
-    out_html = p.join(host_dir, datetime.datetime.utcnow().strftime('%d%m%H%M%S'), R['out'])
+    out_html = p.join(report_dst, datetime.datetime.utcnow().strftime('%y%m%dT%H%M%SZ'), R['out'])
 
     # Cleanup a bit...
     plist = etree.parse(in_plist)
@@ -83,14 +81,15 @@ try:
     transform = etree.XSLT(etree.parse(in_xslt))
     transformed = transform(plist, attachments=etree.XSLT.strparam(host_media))
 
+    print('Writing {0}...'.format(os.path.realpath(out_html)))
     os.makedirs(p.dirname(out_html), exist_ok=True)
     with open(out_html, 'w') as f:
         print(etree.tostring(transformed, pretty_print=True, encoding='unicode'), file=f)
 
-    webbrowser.open('file://' + os.path.realpath(out_html))
-
+    # webbrowser.open('file://' + os.path.realpath(out_html))
 except:
     print('Unexpected error: {0}\n'.format(traceback.format_exc()))
+    print('Usage: transform.py <test logs dir> [<output dir>]')
     sys.exit(1)
 else:
     sys.exit(0)

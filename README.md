@@ -7,4 +7,4 @@ $ ./transform.py <test logs dir> [<output dir>]
 ```
 
 ## Dependencies
-* [lxml](lxml.de)
+* [lxml](http://lxml.de)

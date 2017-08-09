@@ -57,6 +57,12 @@
           <xsl:text disable-output-escaping="yes">
             <![CDATA[
 
+              let exclude = [ 'Wait for app to idle',
+                              'accessibility hierarchy',
+                              'Find:',
+                              'Find the',
+                              'Synthesize event'
+                            ];
               var container = document.getElementById('visualization');
 
               var n = 0;
@@ -70,29 +76,35 @@
                 var group = { id: $(this).attr('id'), content: $(this).find('td:nth-of-type(2)').first().text()}
 
                 $(this).find('time').each(function() {
+
+                  var content = $(this).parent().next().first().text();
+                  if (exclude.some(function(s) { return content.indexOf(s) !== -1; })) {
+                    return;
+                  }
+
                   var d = new Date($(this).attr('datetime'));
                   if (d < min) {
                     min = d;
-                    } else if (d > max) {
+                  } else if (d > max) {
                     max = d;
-                    }
+                  }
 
-                    n = items.push({id: 't' + n, content: $(this).parent().next().first().text(), start: d, group: group['id'] });
+                  n = items.push({id: 't' + n, content: content, start: d, group: group['id'] });
                 });
 
                 groups.push(group);
               });
 
 
-              max = new Date(max.getTime() + 100);
-              min = new Date(min.getTime() - 100);
+              max = new Date(max.getTime() + 5000);
+              min = new Date(min.getTime() - 500);
 
               var options = { max: max,
                               min: min,
                               moveable: false,
                               zoomable: false,
                               snap: null,
-                              timeAxis: {scale: 'millisecond', step: 5},
+                              timeAxis: {scale: 'millisecond', step: 500},
                               showMinorLabels: false,
                               showCurrentTime: false,
                               align: 'left'};
